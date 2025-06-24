@@ -9,15 +9,21 @@ const AppState = (props) => {
 
     const world = "helloworldhowareyou"
 
-    const [appLoader, setappLoader] = useState(true)
+    // const [appLoader, setappLoader] = useState(true)
     const [coverImages, setCoverImages] = useState([])
     const [adminToken, setAdminToken] = useLocalStorage('adminToken', null)
     const [admin, setAdmin] = useState(false)
+    const [settings, setSettings] = useState(null);
+    const [categories, setCategories] = useState([])
+    const [posts, setPosts] = useState([])
+    const [categoryPosts, setCategoryPost] = useState([])
+    const [appLoader, setAppLoader] = useState(false)
+
     const signIn = async (username, password) => {
 
         // settheProductLoader(true)
 
-        const url = "https://hotel-management-backend-application-three.vercel.app/api/auth/login"
+        const url = "http://localhost:5000/api/auth/login"
         const response = await fetch(url, {
             method: "POST", // *GET, POST, PUT, DELETE, etc.
             mode: "cors", // no-cors, *cors, same-origin
@@ -28,12 +34,12 @@ const AppState = (props) => {
                 "Accept": "*",
             },
 
-            body: JSON.stringify({ username, password }), // body data type must match "Content-Type" header
+            body: JSON.stringify({ email: username, password }), // body data type must match "Content-Type" header
         });
         const data = await response.json(); // parses JSON response into native JavaScript objects
-        setAdminToken(data.authToken)
-        if (data.authToken) {
-            history.push('/admin-dashboard')
+        localStorage.setItem('authToken', data.token);
+        if (data.token) {
+            history.push('/admin-dashboard/basic-settings')
             setAdmin(true)
         }
         console.log(data);
@@ -43,7 +49,7 @@ const AppState = (props) => {
         // console.log(data.map((e)=>{return e.id}))
     }
 
-    console.log(adminToken);
+    // console.log(adminToken);
 
     
     const [siteData, setSiteData] = useState({ title: "", email: "", contact: "", description: "", about: "" })
@@ -117,7 +123,7 @@ const AppState = (props) => {
         console.log(allRoomData);
         setAllPackageData(allRoomData)
 
-        setappLoader(false)
+        // setappLoader(false)
     }
 
     const [editLoader, setEditLoader] = useState(false)
@@ -331,12 +337,251 @@ const AppState = (props) => {
 
     }
 
+
+
+   const getBasicSettings = async () => {
+  try {
+    const res = await fetch("http://localhost:5000/api/settings/getsettings");
+    const data = await res.json();
+
+    if (res.ok) {
+      setSettings(data); 
+      console.log(data)
+    } else {
+      console.error("Failed to fetch settings:", data.error || "Unknown error");
+    }
+  } catch (err) {
+    console.error("Error fetching basic settings:", err);
+  }
+};
+
+// let tokenExist;
+useEffect(() => {
+  //    tokenExist = localStorage.getItem("authToken")
+  // if (tokenExist) {
+    getBasicSettings();
+    getCategories();
+    getPosts();
+  
+}, []);
+
+
+
+const updateSettings = async (newSettings) => {
+  try {
+    const res = await fetch("http://localhost:5000/api/settings/updatesettings", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newSettings),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to update settings:", data.error || data);
+      return { success: false, error: data.error || "Update failed" };
+    }
+
+    console.log(" Settings updated successfully:", data);
+    return { success: true, data };
+  } catch (err) {
+    console.error("Network/server error:", err.message);
+    return { success: false, error: err.message };
+  }
+};
+
+
+const getCategories = async()=>{
+    try {
+        const res = await fetch("http://localhost:5000/api/category/getcategories")
+        const data = await res.json()
+        
+        if (res.ok) {
+            setCategories(data)
+    } else {
+      console.error("Failed to fetch Categories:", data.error || "Unknown error");
+    }
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+  } 
+}
+
+
+const createCategory = async (categoryData)=>{
+     try {
+      const res = await fetch('http://localhost:5000/api/category/createcategory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoryData),
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        alert('Category created successfully!');
+      } else {
+        alert('Failed to create category: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error creating category:', error);
+      alert('Server error.');
+    }
+}
+
+
+const createPost = async (post)=>{
+    try {
+      const res = await fetch('http://localhost:5000/api/post/createpost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(post),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert('Post created successfully!');
+      } else {
+        alert('Error: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Submit error:', error);
+      alert('Something went wrong.');
+    }
+}
+
+
+const getPosts = async ()=>{
+    try {
+        const res = await fetch('http://localhost:5000/api/post/getpost')
+    const data = await res.json()
+        
+        if (res.ok) {
+            setPosts(data)
+    } else {
+      console.error("Failed to fetch Posts:", data.error || "Unknown error");
+    }
+  } catch (err) {
+    console.error("Error fetching posts:", err);
+  } 
+}
+
+
+
+const updateCategory = async (id, updatedCategory) => {
+  const res = await fetch(`http://localhost:5000/api/category/updatecategory/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatedCategory),
+  });
+  return await res.json();
+};
+
+
+
+
+const updatePost = async (id,updatedPost) => {
+  try {
+    const res = await fetch(`http://localhost:5000/api/post/updatepost/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedPost),
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      alert('Post updated successfully!');
+      return { success: true, data: result };
+    } else {
+      alert('Failed to update post: ' + result.error);
+      return { success: false, error: result.error };
+    }
+  } catch (error) {
+    console.error('Error updating post:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+
+
+const deleteCategory = async (id) => {
+  try {
+    const res = await fetch(`http://localhost:5000/api/category/deletecategory/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      alert('Category deleted successfully!');
+      return { success: true, data: result };
+    } else {
+      alert('Error deleting category: ' + result.error);
+      return { success: false, error: result.error };
+    }
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    alert('Server error.');
+    return { success: false, error: error.message };
+  }
+};
+
+
+const deletePost = async (id) => {
+  try {
+    const res = await fetch(`http://localhost:5000/api/post/deletepost/${id}`, {
+      method: 'DELETE',
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error('Delete failed:', data.error || 'Unknown error');
+      alert('Failed to delete post.');
+    } else {
+      alert('Post deleted successfully!');
+    }
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    alert('Server error while deleting post.');
+  }
+};
+
+
+
+const getPostsByCategory = async (categoryId) => {
+  try {
+    const response = await fetch(`http://localhost:5000/api/post/getcategorypost/${categoryId}`);
+    const data = await response.json();
+
+    if (data.success) {
+      console.log('Posts:', data.posts);
+     setCategoryPost(data.posts) // or update your state here if in React
+    } else {
+      console.error('Failed to fetch posts');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+
     // 
 
 
-      console.clear()
+    //   console.clear()
     return (
-        <AppContext.Provider value={{deleteRoom,createRoom,editRooms,obj,setobj,allPackageData,roomButtonRef,setRoomSelectedImage,roomImageCloudinary,roomSelectedImage,editorLoader,setCoverImages,editImages,setImageLoader,selectedImage,setSelectedImage,modalRef, editLoader, siteData, world, signIn, coverImages, appLoader, adminToken, admin, setAdminToken, editSiteInfo, setSiteData,cloudinary }}>
+        <AppContext.Provider value={{settings, appLoader, setAppLoader, getPostsByCategory,categoryPosts, deletePost,getBasicSettings, deleteCategory,updatePost, updateCategory, posts,getPosts,createPost ,createCategory ,getCategories,categories, updateSettings, deleteRoom,createRoom,editRooms,obj,setobj,allPackageData,roomButtonRef,setRoomSelectedImage,roomImageCloudinary,roomSelectedImage,editorLoader,setCoverImages,editImages,setImageLoader,selectedImage,setSelectedImage,modalRef, editLoader, siteData, world, signIn, coverImages, appLoader, adminToken, admin, setAdminToken, editSiteInfo, setSiteData,cloudinary }}>
             {props.children}
         </AppContext.Provider>
     )

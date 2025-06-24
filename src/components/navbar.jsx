@@ -1,8 +1,15 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import logo from './LOGO.png'
 import { Link } from 'react-router-dom/cjs/react-router-dom.min'
 import { useRef } from 'react'
+import AppContext from '../context/appContext';
+
+
+
+
 export default function Navbar() {
+    const context = useContext(AppContext);
+  const { categories } = context;
     const refer = useRef(null)
     return (
         <div style={{zIndex:99999}} className=' sticky-top'>
@@ -20,28 +27,20 @@ export default function Navbar() {
                     <div  className="collapse navbar-collapse my-2" id="navbarSupportedContent">
                         <ul className="navbar-nav me-auto my-2 my-lg-0 ">
                             <li className="nav-item">
-                                <a  className="nav-link fw-bold" aria-current="page" href="#">Home</a>
+                                <Link style={{fontSize:"14px"}}  className="nav-link fw-bold" aria-current="page" to="/">Home</Link>
                             </li>
-                            <li className="nav-item">
-                                <a  className="nav-link fw-bold" href="#">Hockey</a>
-                            </li>
-                            <li className="nav-item">
-                                <a  className="nav-link fw-bold" href="#">Hockey News</a>
-                            </li>
-                            <li className="nav-item">
-                                <a  className="nav-link fw-bold" href="#">Hockey Matches</a>
-                            </li>
-                            <li className="nav-item">
-                                <a  className="nav-link fw-bold" href="#">Hockey Live Scores</a>
-                            </li>
-                            <li className="nav-item">
-                                <a  className="nav-link fw-bold" href="#">Hockey Players</a>
-                            </li>
+                          {categories.map((cat) => (
+  <li className="nav-item" key={cat._id}>
+    <Link className="nav-link fw-bold" style={{fontSize:"14px"}} to={`/category/${cat._id}`}>
+      {cat.title}
+    </Link>
+  </li>
+))}
                           
                             <li className="nav-item dropdown">
-                                <a  className="nav-link dropdown-toggle fw-bold" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <Link  className="nav-link dropdown-toggle fw-bold" to="/contact-us" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Contact Us
-                                </a>
+                                </Link>
                                 <ul className="dropdown-menu">
                                     <li><a className="dropdown-item fw-bold" href="#">About Us</a></li>
                                     <li><a className="dropdown-item fw-bold" href="#">Disclaimer</a></li>

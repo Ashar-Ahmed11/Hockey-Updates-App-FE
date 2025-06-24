@@ -1,6 +1,11 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import { Link } from 'react-router-dom/cjs/react-router-dom.min'
+import AppContext from '../context/appContext';
+
+
 export default function Footer() {
+     const context = useContext(AppContext);
+  const { categories } = context;
     return (
         <div>
             <footer class="site-footer">
@@ -14,11 +19,20 @@ export default function Footer() {
                         <div class="col-xs-6 col-md-3">
                             <h6>Quick Links</h6>
                             <ul class="footer-links">
-                                <li><Link onClick={()=>{window.scrollTo({ behavior: 'smooth', top: 0, left: 0,behavior:"instant" })}}  >Hockey</Link></li>
-                                <li><Link onClick={()=>{window.scrollTo({ behavior: 'smooth', top: 0, left: 0,behavior:"instant" })}} >Hockey News</Link></li>
+                                  {categories.map((category) => (
+    <li key={category._id}>
+      <Link 
+        to={`/category/${category._id}`} 
+        onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
+      >
+        {category.title}
+      </Link>
+    </li>
+  ))}
+                                {/* <li><Link onClick={()=>{window.scrollTo({ behavior: 'smooth', top: 0, left: 0,behavior:"instant" })}} >Hockey News</Link></li>
                                 <li><Link onClick={()=>{window.scrollTo({ behavior: 'smooth', top: 0, left: 0,behavior:"instant" })}} >Hockey Players</Link></li>
                                 <li><Link onClick={()=>{window.scrollTo({ behavior: 'smooth', top: 0, left: 0,behavior:"instant" })}} >Hockey Matches</Link></li>
-                                <li><Link onClick={()=>{window.scrollTo({ behavior: 'smooth', top: 0, left: 0,behavior:"instant" })}} >Hockey Live Scores</Link></li>
+                                <li><Link onClick={()=>{window.scrollTo({ behavior: 'smooth', top: 0, left: 0,behavior:"instant" })}} >Hockey Live Scores</Link></li> */}
                             </ul>
                         </div>
 

@@ -26,9 +26,10 @@ export default function Admin() {
 
     // const { adminToken } = context
     const history = useHistory()
-    if(adminToken){
-        history.push("/admin-dashboard")
-    }
+    // const token = localStorage.getItem("authToken")
+    // if(token){
+    //     history.push("/admin-dashboard/basic-settings")
+    // }
     // setImgIsLoaded(true)
     // setMainLoader(false)
     // setcheckouter(true)

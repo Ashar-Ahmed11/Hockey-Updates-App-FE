@@ -1,17 +1,27 @@
-import React from 'react'
+import React, {useEffect, useContext} from 'react'
 import './App.css'
 import Navbar from './components/navbar.jsx'
 import Footer from './components/footer'
+import Admin from './components/admin.jsx'
+import Posts from './components/post.jsx'
+import AdminDashboard from './components/adminDashboard.jsx'
 
 import { Switch, Route, useLocation } from 'react-router-dom/cjs/react-router-dom.min.js'
 import Home from './components/home.jsx'
+import AppContext from './context/appContext.jsx';
+import CategoryPage from './components/categoryPage.jsx'
 
 export default function App() {
+ const { getCategories, appLoader } = useContext(AppContext);
+
+  
+  const location = useLocation()
+  const isAdminRoute = location.pathname.startsWith('/admin-dashboard') || location.pathname.startsWith('/admin');
   
   return (
     <div>
       
-       <Navbar />
+       {!appLoader && !isAdminRoute && <Navbar />}
       
       
 
@@ -24,9 +34,22 @@ export default function App() {
           
         </Route>
 
+        <Route exact path="/admin">
+          <Admin/>
+        </Route>
+        <Route path="/admin-dashboard">
+          <AdminDashboard/>
+        </Route>
+        <Route path="/category/:id">
+          <CategoryPage/>
+        </Route>
+        <Route path="/post/:id">
+          <Posts/>
+        </Route>
+
       </Switch>
       
-       <Footer />
+       {!isAdminRoute && <Footer />}
 
 
 
